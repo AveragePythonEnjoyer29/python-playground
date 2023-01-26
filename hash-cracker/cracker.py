@@ -10,7 +10,7 @@ You should have received a copy of the GNU General Public License along with thi
 If not, see <https://www.gnu.org/licenses/>. 
 """
 
-import hashlib, argparse, os
+import hashlib, sys, argparse, os
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--hash", help="hash to crack", default=None)
@@ -58,30 +58,30 @@ if __name__ == "__main__":
 
     if args.list_algorithms:
         print(f"Supported hashing algorithms: {', '.join(hashing_algorithms.keys())}")
-        exit(0)
+        sys.exit(0)
 
     if not args.hash:
         print("No hash supplied!")
-        exit(1)
+        sys.exit(1)
     
     if not args.algorithm:
         print("No hashing algorithm supplied!")
-        exit(1)
+        sys.exit(1)
 
     args.algorithm = args.algorithm.lower() if args.algorithm else args.algorithm
 
     if not args.algorithm in hashlib.algorithms_available \
         or not args.algorithm in hashing_algorithms.keys():
             print("Hashing algorithm not supported!")
-            exit(1)
+            sys.exit(1)
     
     if not args.wordlist:
         print("No wordlist supplied!")
-        exit(1)
+        sys.exit(1)
     
     if not os.path.exists(args.wordlist):
         print("Wordlist not found!")
-        exit(1)
+        sys.exit(1)
     
     with open(args.wordlist) as fd:
         for line in fd.read().split("\n"):

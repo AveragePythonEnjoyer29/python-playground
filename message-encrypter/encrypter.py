@@ -10,7 +10,7 @@ You should have received a copy of the GNU General Public License along with thi
 If not, see <https://www.gnu.org/licenses/>. 
 """
 
-import hashlib, argparse, string
+import hashlib, sys, argparse, string
 
 from random import choices
 from base64 import b64encode, b64decode
@@ -130,7 +130,7 @@ def decrypt():
         digest_salt = i[4]
     except Exception:
         print("Failed to parse data!")
-        exit(1)
+        sys.exit(1)
 
     cipher = ChaCha20_Poly1305.new(
         key=key,
@@ -146,11 +146,11 @@ def decrypt():
     
     except Exception:
         print("Failed to decrypt ciphertext!")
-        exit(1)
+        sys.exit(1)
 
     if hash_message(cleartext + digest_salt) != digest:
         print("Hash does not match!")
-        exit(1)
+        sys.exit(1)
 
     print("Result:")
     print(cleartext)
@@ -171,4 +171,4 @@ if __name__ == "__main__":
     else:
         decrypt()
 
-    exit(0)
+    sys.exit(0)
