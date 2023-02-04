@@ -21,7 +21,7 @@ from src.ciphers import *
 parser = argparse.ArgumentParser()
 parser.add_argument("--file", nargs=argparse.ONE_OR_MORE, help="file to encrypt", default=None)
 parser.add_argument("--cipher", help="cipher to use when encrypting, see \"--list-ciphers\"", default="aes")
-parser.add_argument("--hash-algo", help="hashing algorithm, see \"--list-hashing-algorithms\"", default="sha256")
+parser.add_argument("--hash-algo", help="hashing algorithm, see \"--list-hashing-algorithms\"", default="sha512")
 parser.add_argument("--passphrase", help="passphrase to use when encrypting the file, defaults to random", default=None, nargs=argparse.ONE_OR_MORE)
 parser.add_argument("--encrypt", action="store_true", default=False, help="encrypt the file")
 parser.add_argument("--decrypt", action="store_true", default=False, help="decrypt the file")
@@ -74,8 +74,9 @@ if __name__ == "__main__":
     if not cipher_info:
         print("Invalid cipher selected!")
         sys.exit(1)
-    
-    b_passphrase = stretch_key(
+
+    # stretch key into valid key size
+    b_passphrase = stretch(
         args.passphrase.encode(),
         cipher_info["key_size"]
     )
@@ -98,6 +99,8 @@ if __name__ == "__main__":
         os.mkdir("temp")
 
     tmpdir = join("temp", randomstr(12))
+
+    print(f"Passphrase: {args.passphrase}")
 
     if args.encrypt:
 
@@ -133,7 +136,6 @@ if __name__ == "__main__":
         # write metadata file
         put_metadata(metadata_file, {
             "name": outfile,
-            "cipher": args.cipher,
             "nonce": nonce,
             "hash": {
                 "digest": digest
@@ -185,6 +187,7 @@ if __name__ == "__main__":
             fd.write(decrypted_buffer)
 
         print(f"Decrypted file: {outfile}")
-    
+
+    # cleanup
     if exists("temp"):
         shutil.rmtree("temp")

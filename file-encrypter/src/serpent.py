@@ -1,4 +1,4 @@
-import argparse, binascii
+import binascii
 
 def hex2bin(hx: str):
 

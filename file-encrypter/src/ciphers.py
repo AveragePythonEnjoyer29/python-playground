@@ -20,10 +20,10 @@ from base64 import urlsafe_b64encode
 from src.util import *
 from src.serpent import *
 
-# DO NOT USE
-# HAS NOT BEEN VERIFIED
-# TO BE A SECURE IMPLEMENTATION
-# YET!!!!!
+# do not use
+# this cipher uses ECB, which is insecure
+# this implementation of Serpent
+# has not been verified yet aswell
 class Serpent_Cipher:
     def __init__(
         self,
@@ -86,8 +86,8 @@ class Serpent_Cipher:
 
         return plaintext
 
-# TODO: 
-# move from ECB to something more secure
+# do not use
+# this cipher uses ECB, which is insecure
 class Threefish_Cipher:
     def __init__(
         self,
@@ -242,21 +242,11 @@ class Aes_XChaCha20Poly1305_Cipher:
         self.key = key
         self.nonce = nonce
 
-        self.stretched_key = stretch_key(
-            key, 
-            64 # AES and Camellia
-        )
+        self.aes_key = self.key[0:32]
+        self.xchacha_key = self.key[32:64]
 
-        self.stretched_nonce = stretch_key(
-            nonce,
-            40
-        )
-
-        self.aes_key = self.stretched_key[0:32]
-        self.xchacha_key = self.stretched_key[32:64]
-
-        self.aes_iv = self.stretched_nonce[0:16]
-        self.xchacha_nonce = self.stretched_nonce[16:]
+        self.aes_iv = self.nonce[0:16]
+        self.xchacha_nonce = self.nonce[16:]
 
         self.cipher_aes = Aes_Cipher(
             self.aes_key,
@@ -428,22 +418,20 @@ class Aes_Camellia_Cipher:
         self.key = key
         self.iv = iv
 
-        self.stretched_key = stretch_key(
-            key, 
-            64 # AES and Camellia
-        )
+        self.aes_key = self.key[0:32]
+        self.cam_key = self.key[32:64]
 
-        self.aes_key = self.stretched_key[0:32]
-        self.cam_key = self.stretched_key[32:64]
+        self.aes_iv = self.iv[0:16]
+        self.cam_iv = self.iv[16:32]
 
         self.cipher_aes = Cipher(
             algorithm=algorithms.AES(self.aes_key),
-            mode=modes.CTR(iv)
+            mode=modes.CTR(self.aes_iv)
         )
 
         self.cipher_camellia = Cipher(
             algorithm=algorithms.Camellia(self.cam_key),
-            mode=modes.CTR(iv)
+            mode=modes.CTR(self.aes_iv)
         )
     
     def encrypt(
@@ -553,8 +541,8 @@ cipherdict = {
     "aes_camellia": {
         "name": "AES-256 + Camellia",
         "cipher": Aes_Camellia_Cipher,
-        "key_size": 32,
-        "nonce_size": 16
+        "key_size": 64,
+        "nonce_size": 32
     },
 
     "xchacha": {
@@ -567,8 +555,8 @@ cipherdict = {
     "xchacha_aes": {
         "name": "XChaCha20Poly1305 + AES-256",
         "cipher": Aes_XChaCha20Poly1305_Cipher,
-        "key_size": 32,
-        "nonce_size": 16
+        "key_size": 64,
+        "nonce_size": 40
     },
 
     "fernet": {

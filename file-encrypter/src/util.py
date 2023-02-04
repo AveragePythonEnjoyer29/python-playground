@@ -18,22 +18,35 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 
-def stretch_key(
-    key: bytes,
+def stretch(
+    source: bytes,
     length: int
     ) -> bytes:
+    """
+    Stretches the bytes from @source using maths to @length
+
+    :param source bytes: Bytes to stretch
+    :param length int: Final length
+    """
 
     return HKDF(
         algorithm=hashes.SHA512(),
         length=length,
         salt=None,
         info=None,
-    ).derive(key)
+    ).derive(source)
 
 def randomstr(
     length: int,
     chars: str | list[str] = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM"
     ) -> str:
+    """
+    Generates a @length characters long random string
+
+    :param length int: Length of the character
+    :param chars str or list[str]: List of allowed characters
+    :returns str: Random string
+    """
 
     return "".join(choices(chars, k=length))
 
@@ -106,7 +119,6 @@ def put_metadata(
     
     metadata = {
         "name": raw["name"],
-        "cipher": raw["cipher"],
         "nonce": urlsafe_b64encode(raw["nonce"]).decode(),
         "hash": {
             "digest": raw["hash"]["digest"]
@@ -153,7 +165,6 @@ def get_metadata(
     
     metadata = {
         "name": raw["name"],
-        "cipher": raw["cipher"],
         "nonce": urlsafe_b64decode(raw["nonce"]),
         "hash": {
             "digest": raw["hash"]["digest"]
